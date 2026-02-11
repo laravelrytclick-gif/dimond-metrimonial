@@ -4,7 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\Admin\PermissionController;    
+use App\Http\Controllers\Admin\PermissionController;   
+use App\Http\Controllers\Admin\ProfileController;    
+
 use App\Http\Controllers\TestimonialController;
 
 // Authentication Routes
@@ -20,12 +22,18 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['can:manage users'])->group(function () {
         Route::resource('users', UserController::class);
     });
-    
+    // In routes/web.php
+Route::resource('profiles', ProfileController::class)->middleware('auth');
+
+// Inside the auth middleware group
+Route::resource('profiles.family', 'App\Http\Controllers\Admin\ProfileFamilyController')
+    ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     // Role Management
     Route::middleware(['can:manage roles'])->group(function () {
         Route::resource('roles', RoleController::class);
     });
     
+
     // Permission Management
     Route::middleware(['can:manage permissions'])->group(function () {
         Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');

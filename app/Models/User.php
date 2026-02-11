@@ -27,4 +27,14 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'is_active' => 'boolean',
     ];
+
+    public function profile()
+{
+    return $this->hasOne(Profile::class);
+}
+ 
+public function managedProfiles()
+{
+    return $this->hasMany(Profile::class, 'rm_id');
+}
 }
