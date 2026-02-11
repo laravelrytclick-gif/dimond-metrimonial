@@ -2,72 +2,45 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
 class RolePermissionSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        // Reset cache
+        // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create permissions
         $permissions = [
-            'view testimonials',
-            'create testimonials',
-            'edit testimonials',
-            'delete testimonials',
-            'approve testimonials',
-            'feature testimonials',
-            'manage users',
-            'manage roles',
-            'manage permissions'
+            'manage profiles',
+            'view profiles',
+            'create profiles',
+            'edit profiles',
+            'delete profiles',
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Create roles
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
-        $rmRole = Role::firstOrCreate(['name' => 'rm']);
+        // Create roles and assign created permissions
+        $role = Role::firstOrCreate(['name' => 'admin']);
+        $role->givePermissionTo(Permission::all());
 
-        // Assign permissions to roles
-        $adminRole->syncPermissions(Permission::all());
-
-        $rmRole->syncPermissions([
-            'view testimonials',
-            'create testimonials',
-            'edit testimonials',
-            'delete testimonials'
+        $role = Role::firstOrCreate(['name' => 'rm']);
+        $role->givePermissionTo([
+            'view profiles',
+            'create profiles',
+            'edit profiles',
         ]);
 
-        // Create admin user
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@example.com'],
-            [
-                'name' => 'Admin User',
-                'password' => Hash::make('password'),
-                'is_active' => true
-            ]
-        );
-
-        $admin->assignRole('admin');
-
-        // Create RM user
-        $rm = User::firstOrCreate(
-            ['email' => 'rm@example.com'],
-            [
-                'name' => 'Relationship Manager',
-                'password' => Hash::make('password'),
-                'is_active' => true
-            ]
-        );
-
-        $rm->assignRole('rm');
+        // Assign admin role to first user
+        $user = \App\Models\User::first();
+        if ($user) {
+            $user->assignRole('admin');
+        }
     }
 }
