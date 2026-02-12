@@ -129,12 +129,27 @@
                     </div>
                 </div>
             </div>
-            <div class="card-header d-flex justify-content-between align-items-center">
+ <div class="card-header d-flex justify-content-between align-items-center">
     <span>Profile Details</span>
     <div>
         <a href="{{ route('profiles.family.index', $profile) }}" class="btn btn-sm btn-info me-2">
-            <i class="fas fa-users"></i> Family Members
+            <i class="fas fa-users"></i> Family
         </a>
+        <a href="{{ route('profiles.backgrounds.index', $profile) }}" class="btn btn-sm btn-info me-2">
+            <i class="fas fa-graduation-cap"></i> Background
+        </a>
+       @if($profile->matchPreference)
+    <a href="{{ route('profiles.match-preferences.edit', [$profile, $profile->matchPreference]) }}" 
+       class="btn btn-sm btn-info me-2">
+        <i class="fas fa-heart"></i> Match Preferences
+    </a>
+@endif
+@can('update', $profile)
+    <a href="{{ route('profiles.shortlists.index', $profile) }}" class="btn btn-sm btn-info me-2">
+        <i class="fas fa-list"></i> Shortlists
+    </a>
+@endcan
+
         @can('update', $profile)
             <a href="{{ route('profiles.edit', $profile) }}" class="btn btn-sm btn-primary">
                 <i class="fas fa-edit"></i> Edit Profile
@@ -142,6 +157,7 @@
         @endcan
     </div>
 </div>
+
         </div>
     </div>
 </div>

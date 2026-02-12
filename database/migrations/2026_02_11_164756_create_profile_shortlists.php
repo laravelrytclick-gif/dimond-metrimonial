@@ -1,0 +1,27 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('profile_shortlists', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('profile_id')->constrained('profiles')->onDelete('cascade');
+            $table->foreignId('shortlisted_profile_id')->constrained('profiles')->onDelete('cascade');
+            $table->foreignId('shortlisted_by')->constrained('users')->onDelete('cascade');
+            $table->timestamps();
+            
+            // Prevent duplicate shortlists
+            $table->unique(['profile_id', 'shortlisted_profile_id']);
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('profile_shortlists');
+    }
+};
