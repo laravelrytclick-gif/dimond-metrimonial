@@ -82,4 +82,28 @@ class Profile extends Model
 {
     return $this->hasMany(ProfileFamily::class);
 }
+// Relationship with ProfileBackground
+public function backgrounds()
+{
+    return $this->hasMany(ProfileBackground::class);
+}
+// In app/Models/Profile.php
+
+public function matchPreference()
+{
+    return $this->hasOne(ProfileMatchPreference::class);
+}
+
+// In app/Models/Profile.php
+
+public function shortlists()
+{
+    return $this->hasMany(ProfileShortlist::class);
+}
+
+public function shortlistedBy()
+{
+    return $this->hasMany(ProfileShortlist::class, 'shortlisted_profile_id');
+}
+
 }
