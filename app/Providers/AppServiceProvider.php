@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use App\Models\User;
+use App\Models\Profile;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
             if (app()->runningInConsole()) {
                 return;
             }
+    Profile::observe(\App\Observers\ProfileObserver::class);
 
             // Register a super-admin role that bypasses all permissions
             Gate::before(function (User $user, $ability) {

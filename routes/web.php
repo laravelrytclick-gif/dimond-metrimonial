@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\PermissionController;   
 use App\Http\Controllers\Admin\ProfileController;    
+use App\Http\Controllers\Admin\ProfileStatusHistoryController;
 
 use App\Http\Controllers\TestimonialController;
 
@@ -58,7 +59,34 @@ Route::resource('profiles.shortlists', 'App\Http\Controllers\Admin\ProfileShortl
             ];
         });
 })->name('api.profiles.search');
+// Inside the auth middleware group
+Route::resource('profiles.meetings', 'App\Http\Controllers\Admin\ProfileMeetingController')
+    ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+// Inside the auth middleware group
+Route::resource('profiles.calls', 'App\Http\Controllers\Admin\ProfileCallFollowupController')
+    ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 
+// Inside the auth middleware group
+Route::resource('profiles.attachments', 'App\Http\Controllers\Admin\ProfileAttachmentController')
+    ->only(['index', 'store', 'show', 'destroy']);
+    // Inside the auth middleware group
+Route::resource('profiles.finance', 'App\Http\Controllers\Admin\ProfileFinanceController')
+    ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
+    // Inside the auth middleware group
+Route::resource('profiles.proposals', 'App\Http\Controllers\Admin\ProfileDispatchProposalController')
+    ->only(['index', 'create', 'store', 'show']);
+
+Route::post('profiles/{profile}/proposals/{proposal}/status', 
+    [ProfileDispatchProposalController::class, 'updateStatus'])
+    ->name('profiles.proposals.status');
+
+    // Inside the auth middleware group
+Route::prefix('profiles/{profile}')->group(function () {
+    Route::get('status-history', [ProfileStatusHistoryController::class, 'index'])
+        ->name('profiles.status-history.index');
+    Route::post('status-history', [ProfileStatusHistoryController::class, 'updateStatus'])
+        ->name('profiles.status-history.update');
+});
     // Testimonials
     Route::resource('testimonials', TestimonialController::class);
     

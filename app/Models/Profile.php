@@ -105,5 +105,73 @@ public function shortlistedBy()
 {
     return $this->hasMany(ProfileShortlist::class, 'shortlisted_profile_id');
 }
+// In app/Models/Profile.php
+
+public function callFollowups()
+{
+    return $this->hasMany(ProfileCallFollowup::class)->latest();
+}
+// In app/Models/Profile.php
+public function meetings()
+{
+    return $this->hasMany(ProfileMeeting::class)->latest('meeting_date');
+}
+// In app/Models/Profile.php
+public function sentProposals()
+{
+    return $this->hasMany(ProfileDispatchProposal::class, 'sender_profile_id');
+}
+
+public function receivedProposals()
+{
+    return $this->hasMany(ProfileDispatchProposal::class, 'receiver_profile_id');
+}
+
+// In app/Models/Profile.php
+public function statusHistories()
+{
+    return $this->hasMany(ProfileStatusHistory::class)->latest('changed_at');
+}
+
+// In app/Models/Profile.php
+public function finances()
+{
+    return $this->hasMany(ProfileFinance::class)->latest('payment_date');
+}
+
+public function getActiveSubscriptionAttribute()
+{
+    return $this->finances()
+        ->where('expiry_date', '>=', now())
+        ->orderBy('expiry_date', 'desc')
+        ->first();
+}
+
+// In app/Models/Profile.php
+public function attachments()
+{
+    return $this->hasMany(ProfileAttachment::class)->latest();
+}
+
+public function photos()
+{
+    return $this->hasMany(ProfileAttachment::class)
+        ->where('category', 'photo')
+        ->latest();
+}
+
+public function biodatas()
+{
+    return $this->hasMany(ProfileAttachment::class)
+        ->where('category', 'biodata')
+        ->latest();
+}
+
+public function idProofs()
+{
+    return $this->hasMany(ProfileAttachment::class)
+        ->where('category', 'id')
+        ->latest();
+}
 
 }

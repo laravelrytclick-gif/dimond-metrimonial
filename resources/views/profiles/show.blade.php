@@ -7,13 +7,56 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>{{ __('Profile Details') }}: {{ $profile->full_name }}</span>
-                    <div class="btn-group">
+                    <div>
+                        <a href="{{ route('profiles.family.index', $profile) }}" class="btn btn-sm btn-info me-2">
+                            <i class="fas fa-users"></i> Family
+                        </a>
+                        <a href="{{ route('profiles.backgrounds.index', $profile) }}" class="btn btn-sm btn-info me-2">
+                            <i class="fas fa-graduation-cap"></i> Background
+                        </a>
+                        @if($profile->matchPreference)
+                            <a href="{{ route('profiles.match-preferences.edit', [$profile, $profile->matchPreference]) }}" 
+                               class="btn btn-sm btn-info me-2">
+                                <i class="fas fa-heart"></i> Match Preferences
+                            </a>
+                        @endif
                         @can('update', $profile)
-                            <a href="{{ route('profiles.edit', $profile) }}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-edit"></i> {{ __('Edit') }}
+    <a href="{{ route('profiles.meetings.index', $profile) }}" class="btn btn-sm btn-info me-2">
+        <i class="fas fa-calendar-alt"></i> Meetings
+    </a>
+@endcan
+@can('update', $profile)
+    <a href="{{ route('profiles.proposals.index', $profile) }}" class="btn btn-sm btn-info me-2">
+        <i class="fas fa-paper-plane"></i> Proposals
+    </a>
+@endcan
+@can('update', $profile)
+    <a href="{{ route('profiles.status-history.index', $profile) }}" class="btn btn-sm btn-info me-2">
+        <i class="fas fa-history"></i> Status History
+    </a>
+@endcan
+@can('update', $profile)
+    <a href="{{ route('profiles.finance.index', $profile) }}" class="btn btn-sm btn-info me-2">
+        <i class="fas fa-rupee-sign"></i> Payments
+    </a>
+@endcan
+@can('update', $profile)
+    <a href="{{ route('profiles.attachments.index', $profile) }}" class="btn btn-sm btn-info me-2">
+        <i class="fas fa-paperclip"></i> Attachments
+    </a>
+@endcan
+                        @can('update', $profile)
+                            <a href="{{ route('profiles.shortlists.index', $profile) }}" class="btn btn-sm btn-info me-2">
+                                <i class="fas fa-list"></i> Shortlists
+                            </a>
+                            <a href="{{ route('profiles.calls.index', $profile) }}" class="btn btn-sm btn-info me-2">
+                                <i class="fas fa-phone"></i> Call Logs
+                            </a>
+                            <a href="{{ route('profiles.edit', $profile) }}" class="btn btn-sm btn-primary me-2">
+                                <i class="fas fa-edit"></i> Edit
                             </a>
                         @endcan
-                        <a href="{{ route('profiles.index') }}" class="btn btn-secondary btn-sm">
+                        <a href="{{ route('profiles.index') }}" class="btn btn-sm btn-secondary">
                             <i class="fas fa-arrow-left"></i> {{ __('Back to List') }}
                         </a>
                     </div>
@@ -44,6 +87,7 @@
                         </div>
                         
                         <div class="col-md-8">
+                            <!-- Rest of your profile content remains the same -->
                             <div class="row">
                                 <div class="col-md-6">
                                     <h5 class="border-bottom pb-2">{{ __('Personal Information') }}</h5>
@@ -129,35 +173,6 @@
                     </div>
                 </div>
             </div>
- <div class="card-header d-flex justify-content-between align-items-center">
-    <span>Profile Details</span>
-    <div>
-        <a href="{{ route('profiles.family.index', $profile) }}" class="btn btn-sm btn-info me-2">
-            <i class="fas fa-users"></i> Family
-        </a>
-        <a href="{{ route('profiles.backgrounds.index', $profile) }}" class="btn btn-sm btn-info me-2">
-            <i class="fas fa-graduation-cap"></i> Background
-        </a>
-       @if($profile->matchPreference)
-    <a href="{{ route('profiles.match-preferences.edit', [$profile, $profile->matchPreference]) }}" 
-       class="btn btn-sm btn-info me-2">
-        <i class="fas fa-heart"></i> Match Preferences
-    </a>
-@endif
-@can('update', $profile)
-    <a href="{{ route('profiles.shortlists.index', $profile) }}" class="btn btn-sm btn-info me-2">
-        <i class="fas fa-list"></i> Shortlists
-    </a>
-@endcan
-
-        @can('update', $profile)
-            <a href="{{ route('profiles.edit', $profile) }}" class="btn btn-sm btn-primary">
-                <i class="fas fa-edit"></i> Edit Profile
-            </a>
-        @endcan
-    </div>
-</div>
-
         </div>
     </div>
 </div>
