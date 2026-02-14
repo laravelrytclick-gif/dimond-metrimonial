@@ -1,102 +1,97 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\Admin\PermissionController;   
-use App\Http\Controllers\Admin\ProfileController;    
+use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProfileStatusHistoryController;
 
-use App\Http\Controllers\TestimonialController;
-
 // Authentication Routes
-Auth::routes(['register' => true]);
+Auth::routes(['register' => false]);
 
 // Home Route
-Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
+Route::get('/', function () {
+    return view('welcome');
+})->middleware('guest');
 
-// Admin Routes
-Route::middleware(['auth'])->group(function () {
-    // User Management
-    Route::middleware(['can:manage users'])->group(function () {
-        Route::resource('users', UserController::class);
+// Authenticated Routes
+Route::middleware('auth')->group(function () {
+    // Dashboard
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    
+    // Profile Routes
+    Route::resource('profiles', ProfileController::class);
+    
+    // Nested Profile Resources
+    Route::prefix('profiles/{profile}')->group(function () {
+        // Family
+        Route::resource('family', 'App\Http\Controllers\Admin\ProfileFamilyController')
+            ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+            
+        // Backgrounds
+        Route::resource('backgrounds', 'App\Http\Controllers\Admin\ProfileBackgroundController')
+            ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+            
+        // Match Preferences
+        Route::resource('match-preferences', 'App\Http\Controllers\Admin\ProfileMatchPreferenceController')
+            ->only(['edit', 'update']);
+            
+        // Shortlists
+        Route::resource('shortlists', 'App\Http\Controllers\Admin\ProfileShortlistController')
+            ->only(['index', 'store', 'destroy']);
+            
+        // Call Logs
+        Route::resource('calls', 'App\Http\Controllers\Admin\ProfileCallFollowupController')
+            ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+            
+        // Meetings
+        Route::resource('meetings', 'App\Http\Controllers\Admin\ProfileMeetingController')
+            ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+            
+        // Proposals
+        Route::resource('proposals', 'App\Http\Controllers\Admin\ProfileDispatchProposalController')
+            ->only(['index', 'create', 'store', 'show']);
+        Route::post('proposals/{proposal}/status', 'App\Http\Controllers\Admin\ProfileDispatchProposalController@updateStatus')
+            ->name('profiles.proposals.status');
+            
+        // Status History
+        Route::get('status-history', [ProfileStatusHistoryController::class, 'index'])
+            ->name('profiles.status-history.index');
+        Route::post('status-history', [ProfileStatusHistoryController::class, 'updateStatus'])
+            ->name('profiles.status-history.update');
+            
+        // Finance
+        Route::resource('finance', 'App\Http\Controllers\Admin\ProfileFinanceController')
+            ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
+            
+        // Attachments
+        Route::resource('attachments', 'App\Http\Controllers\Admin\ProfileAttachmentController')
+            ->only(['index', 'store', 'show', 'destroy']);
     });
-    // In routes/web.php
-Route::resource('profiles', ProfileController::class)->middleware('auth');
-
-// Inside the auth middleware group
-Route::resource('profiles.family', 'App\Http\Controllers\Admin\ProfileFamilyController')
-    ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+    
     // Role Management
     Route::middleware(['can:manage roles'])->group(function () {
         Route::resource('roles', RoleController::class);
     });
     
-// Inside the auth middleware group
-Route::resource('profiles.backgrounds', 'App\Http\Controllers\Admin\ProfileBackgroundController')
-    ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     // Permission Management
     Route::middleware(['can:manage permissions'])->group(function () {
         Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
     });
-// Inside the auth middleware group
-Route::resource('profiles.match-preferences', 'App\Http\Controllers\Admin\ProfileMatchPreferenceController')
-    ->only(['edit', 'update']);
-
-    // Inside the auth middleware group
-Route::resource('profiles.shortlists', 'App\Http\Controllers\Admin\ProfileShortlistController')
-    ->only(['index', 'store', 'destroy']);
-    Route::get('/profiles/search', function (\Illuminate\Http\Request $request) {
-    return \App\Models\Profile::where('full_name', 'like', "%{$request->q}%")
-        ->limit(10)
-        ->get()
-        ->map(function ($profile) {
-            return [
-                'id' => $profile->id,
-                'text' => $profile->full_name,
-            ];
-        });
-})->name('api.profiles.search');
-// Inside the auth middleware group
-Route::resource('profiles.meetings', 'App\Http\Controllers\Admin\ProfileMeetingController')
-    ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
-// Inside the auth middleware group
-Route::resource('profiles.calls', 'App\Http\Controllers\Admin\ProfileCallFollowupController')
-    ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
-
-// Inside the auth middleware group
-Route::resource('profiles.attachments', 'App\Http\Controllers\Admin\ProfileAttachmentController')
-    ->only(['index', 'store', 'show', 'destroy']);
-    // Inside the auth middleware group
-Route::resource('profiles.finance', 'App\Http\Controllers\Admin\ProfileFinanceController')
-    ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
-    // Inside the auth middleware group
-Route::resource('profiles.proposals', 'App\Http\Controllers\Admin\ProfileDispatchProposalController')
-    ->only(['index', 'create', 'store', 'show']);
-
-Route::post('profiles/{profile}/proposals/{proposal}/status', 
-    [ProfileDispatchProposalController::class, 'updateStatus'])
-    ->name('profiles.proposals.status');
-
-    // Inside the auth middleware group
-Route::prefix('profiles/{profile}')->group(function () {
-    Route::get('status-history', [ProfileStatusHistoryController::class, 'index'])
-        ->name('profiles.status-history.index');
-    Route::post('status-history', [ProfileStatusHistoryController::class, 'updateStatus'])
-        ->name('profiles.status-history.update');
-});
+    
     // Testimonials
     Route::resource('testimonials', TestimonialController::class);
     
-    Route::middleware(['can:approve testimonials'])->group(function () {
-        Route::post('testimonials/{testimonial}/approve', [TestimonialController::class, 'approve'])->name('testimonials.approve');
-    });
-    
-    Route::middleware(['can:feature testimonials'])->group(function () {
-        Route::post('testimonials/{testimonial}/feature', [TestimonialController::class, 'feature'])->name('testimonials.feature');
-    });
+    // API Search
+    Route::get('/profiles/search', function (\Illuminate\Http\Request $request) {
+        return \App\Models\Profile::where('full_name', 'like', "%{$request->q}%")
+            ->limit(10)
+            ->get()
+            ->map(function ($profile) {
+                return [
+                    'id' => $profile->id,
+                    'text' => $profile->full_name,
+                ];
+            });
+    })->name('api.profiles.search');
 });
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
