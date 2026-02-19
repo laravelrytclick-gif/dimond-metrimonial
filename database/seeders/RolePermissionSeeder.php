@@ -1,10 +1,12 @@
 <?php
-
 namespace Database\Seeders;
+// In database/seeders/RolePermissionSeeder.php
 
-use Illuminate\Database\Seeder;
+use App\Models\User;
+
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Database\Seeder;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -15,32 +17,48 @@ class RolePermissionSeeder extends Seeder
 
         // Create permissions
         $permissions = [
-            'manage profiles',
-            'view profiles',
-            'create profiles',
-            'edit profiles',
-            'delete profiles',
+            // User permissions
+            'view users',
+            'create users',
+            'edit users',
+            'delete users',
+            
+            // Role permissions
+            'view roles',
+            'create roles',
+            'edit roles',
+            'delete roles',
+            
+            // Permission permissions
+            'view permissions',
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Create roles and assign created permissions
-        $role = Role::firstOrCreate(['name' => 'admin']);
-        $role->givePermissionTo(Permission::all());
+        // Create admin role and assign all permissions
+        $adminRole = Role::firstOrCreate(['name' => 'super-admin']);
+        $adminRole->syncPermissions(Permission::all());
 
-        $role = Role::firstOrCreate(['name' => 'rm']);
-        $role->givePermissionTo([
-            'view profiles',
-            'create profiles',
-            'edit profiles',
+        // Create admin user if not exists
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => bcrypt('password'),
+            ]
+        );
+
+        // Assign role to admin user
+        $admin->assignRole($adminRole);
+
+        // Create a test user with view permissions
+        $userRole = Role::firstOrCreate(['name' => 'user']);
+        $userRole->givePermissionTo([
+            'view users',
+            'view roles',
+            'view permissions'
         ]);
-
-        // Assign admin role to first user
-        $user = \App\Models\User::first();
-        if ($user) {
-            $user->assignRole('admin');
-        }
     }
 }

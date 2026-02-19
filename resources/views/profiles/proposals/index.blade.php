@@ -58,4 +58,28 @@
         </div>
     </div>
 </div>
+<style>
+    /* Style for tab links */
+    .nav-tabs .nav-link {
+        color: #000 !important;
+        font-weight: 500;
+    }
+    
+    /* Active tab style */
+    .nav-tabs .nav-link.active {
+        color: #000 !important;
+        font-weight: 600;
+        border-bottom: 2px solid #000;
+    }
+    
+    /* Hover state */
+    .nav-tabs .nav-link:hover:not(.active) {
+        color: #333 !important;
+    }
+    
+    /* Tab content area */
+    .tab-content {
+        padding: 20px 0;
+    }
+</style>
 @endsection
