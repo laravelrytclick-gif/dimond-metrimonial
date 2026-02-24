@@ -45,7 +45,7 @@
                 @endcan
                 
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->is('profile-search') ? 'active' : '' }}" href="#">
+                    <a class="nav-link {{ request()->is('profile-search') ? 'active' : '' }}" href="{{ route('profiles.search') }}">
                         <i class="bi bi-search"></i> Profile Search
                     </a>
                 </li>
@@ -93,17 +93,6 @@
                     </ul>
                 </li>
             </ul>
-            
-            <!-- Search Form -->
-            <form class="d-flex" action="{{ route('profiles.index') }}" method="GET">
-                <div class="input-group">
-                    <input type="text" name="search" class="form-control form-control-sm" 
-                           placeholder="Search profiles..." value="{{ request('search') }}">
-                    <button class="btn btn-outline-primary btn-sm" type="submit">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 </nav>

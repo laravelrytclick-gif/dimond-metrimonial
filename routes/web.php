@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\{
     ProfileFinanceController,
     ProfileDispatchProposalController
 };
+use App\Http\Controllers\SearchProfileController;
 use App\Http\Controllers\TestimonialController;
 use App\Models\Profile;
 use Illuminate\Http\Request;
@@ -42,12 +43,19 @@ Route::middleware(['auth'])->group(function () {
         ->except(['index', 'show'])
         ->middleware('can:create,App\Models\Profile');
     
+    // Profile Search Routes
+    Route::get('profile-search', [SearchProfileController::class, 'index'])->name('profiles.search');
+    Route::get('profiles/search/results', [SearchProfileController::class, 'search'])->name('profiles.search.results');
+    
     // Make profile show route accessible without admin role
     Route::get('profiles/{profile}', [ProfileController::class, 'show'])
         ->name('profiles.show')
         ->middleware('can:view,profile');
       // User Management
     Route::resource('users', UserController::class);
+    
+    // Permission Management
+    Route::resource('permissions', PermissionController::class)->names('admin.permissions');
     
     // Role Management
     Route::resource('roles', RoleController::class);
@@ -57,7 +65,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('permissions.index');
     
     // Profile Management
-    Route::resource('profiles', ProfileController::class)
+    Route::resource('admin/profiles', ProfileController::class)
         ->except(['index', 'show']);
     
     // Admin Routes Group
