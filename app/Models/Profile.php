@@ -2,6 +2,7 @@
 
 namespace App\Models;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -55,6 +56,97 @@ class Profile extends Model
         'registration_date' => 'date',
         'income' => 'decimal:2',
     ];
+
+    // Accessor for age
+    public function getAgeAttribute()
+    {
+        return $this->dob ? $this->dob->age : null;
+    }
+
+    /**
+     * Scope to filter profiles based on search criteria
+     */
+    public function scopeFilter(Builder $query, array $filters): Builder
+    {
+        // Age filter
+        if (!empty($filters['age_from'])) {
+            $query->whereRaw('TIMESTAMPDIFF(YEAR, dob, CURDATE()) >= ?', [$filters['age_from']]);
+        }
+        
+        if (!empty($filters['age_to'])) {
+            $query->whereRaw('TIMESTAMPDIFF(YEAR, dob, CURDATE()) <= ?', [$filters['age_to']]);
+        }
+
+        // Height filter (assuming height is stored in cm)
+        if (!empty($filters['height_from'])) {
+            $query->where('height', '>=', $this->convertHeightToCm($filters['height_from']));
+        }
+        
+        if (!empty($filters['height_to'])) {
+            $query->where('height', '<=', $this->convertHeightToCm($filters['height_to']));
+        }
+
+        // Array filters
+        $arrayFilters = [
+            'religion', 'caste', 'sub_caste', 'eating_habit', 'drinking_habit', 
+            'smoking_habit', 'highest_education', 'marital_status',
+            'occupation', 'income', 'city', 'state', 'country', 
+            'work_location', 'gender', 'blood_group', 'complexion', 
+            'gotra', 'status'
+        ];
+
+        foreach ($arrayFilters as $field) {
+            if (!empty($filters[$field]) && is_array($filters[$field])) {
+                $query->whereIn($field, $filters[$field]);
+            }
+        }
+
+        return $query;
+    }
+
+    /**
+     * Convert height format to cm
+     */
+    private function convertHeightToCm($height): int
+    {
+        // If height is already in cm
+        if (is_numeric($height)) {
+            return (int) $height;
+        }
+
+        // Convert feet'inches" format to cm
+        if (preg_match("/(\d+)'(\d+)\"/", $height, $matches)) {
+            $feet = (int) $matches[1];
+            $inches = (int) $matches[2];
+            return (int) (($feet * 12 + $inches) * 2.54);
+        }
+
+        return 0;
+    }
+
+    /**
+     * Search across all profile fields
+     */
+    public static function searchAllFields($searchTerm)
+    {
+        return self::where(function ($query) use ($searchTerm) {
+            $query->where('full_name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('first_name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('email', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('address', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('city', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('state', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('country', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('occupation', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('religion', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('caste', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('sub_caste', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('highest_education', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('user_code', 'LIKE', "%{$searchTerm}%");
+        });
+    }
 
     // Relationship with User
     public function user()

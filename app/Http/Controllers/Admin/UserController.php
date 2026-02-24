@@ -11,16 +11,21 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['auth', 'role:admin']);
+    }
+
     public function index()
     {
         $users = User::with('roles')->paginate(10);
-        return view('users.index', compact('users'));
+        return view('admin.users.index', compact('users'));
     }
 
     public function create()
     {
         $roles = Role::all();
-        return view('users.create', compact('roles'));
+        return view('admin.users.create', compact('roles'));
     }
 
     public function store(Request $request)
@@ -41,20 +46,21 @@ class UserController extends Controller
             'is_active' => $request->has('is_active')
         ]);
 
-        $user->roles()->sync($validated['roles']);
+        $user->syncRoles($validated['roles']);
 
-        return redirect()->route('users.index')->with('success', 'User created successfully');
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User created successfully');
     }
 
     public function edit(User $user)
     {
         $roles = Role::all();
-        return view('users.edit', compact('user', 'roles'));
+        return view('admin.users.edit', compact('user', 'roles'));
     }
 
     public function update(Request $request, User $user)
     {
-        $validated = $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => [
                 'required',
@@ -67,7 +73,9 @@ class UserController extends Controller
             'roles' => 'required|array',
             'roles.*' => 'exists:roles,id',
             'is_active' => 'boolean'
-        ]);
+        ];
+
+        $validated = $request->validate($rules);
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
@@ -79,18 +87,23 @@ class UserController extends Controller
         $user->is_active = $request->has('is_active');
         $user->save();
 
-        $user->roles()->sync($validated['roles']);
+        $user->syncRoles($validated['roles']);
 
-        return redirect()->route('users.index')->with('success', 'User updated successfully');
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User updated successfully');
     }
 
     public function destroy(User $user)
     {
-        if ($user->hasRole('admin')) {
-            return redirect()->back()->with('error', 'Cannot delete admin user');
+        // Prevent deleting yourself
+        if (auth()->id() === $user->id) {
+            return redirect()->back()
+                ->with('error', 'You cannot delete your own account');
         }
 
         $user->delete();
-        return redirect()->route('users.index')->with('success', 'User deleted successfully');
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User deleted successfully');
     }
 }

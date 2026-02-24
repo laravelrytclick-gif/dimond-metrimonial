@@ -96,5 +96,5 @@ class ProfileAttachmentController extends Controller
         $attachment->delete();
 
         return back()->with('success', 'Attachment deleted successfully');
-    }
+    }  
 }

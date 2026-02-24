@@ -9,17 +9,25 @@ use Illuminate\Http\Request;
 
 class RoleController extends Controller
 {
-    public function index()
-    {
-        $roles = Role::with('permissions')->get();
-        return view('roles.index', compact('roles'));
-    }
+public function index()
+{
+    $roles = Role::with('permissions')->paginate(10);
+    return view('admin.roles.index', compact('roles'));
+}
 
-    public function create()
-    {
-        $permissions = Permission::all();
-        return view('roles.create', compact('permissions'));
-    }
+
+public function create()
+{
+    $permissions = Permission::all();
+    return view('admin.roles.create', compact('permissions'));
+}
+
+// public function edit(Role $role)
+// {
+//     $permissions = Permission::all();
+//     return view('admin.roles.edit', compact('role', 'permissions'));
+// }
+
 
     public function store(Request $request)
     {
@@ -41,14 +49,23 @@ class RoleController extends Controller
     }
 
     public function edit(Role $role)
-    {
-        if ($role->name === 'admin') {
-            return redirect()->route('roles.index')->with('error', 'Cannot edit admin role');
-        }
+{
+    $permissions = Permission::all();
+    $roles = Role::with('permissions')->get(); // add this
 
-        $permissions = Permission::all();
-        return view('roles.edit', compact('role', 'permissions'));
-    }
+    return view('admin.roles.edit', compact('role', 'permissions', 'roles'));
+}
+
+
+    // public function edit(Role $role)
+    // {
+    //     if ($role->name === 'admin') {
+    //         return redirect()->route('roles.index')->with('error', 'Cannot edit admin role');
+    //     }
+
+    //     $permissions = Permission::all();
+    //     return view('roles.edit', compact('role', 'permissions'));
+    // }
 
     public function update(Request $request, Role $role)
     {
