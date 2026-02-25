@@ -17,7 +17,8 @@ use App\Http\Controllers\Admin\{
     ProfileCallFollowupController,
     ProfileAttachmentController,
     ProfileFinanceController,
-    ProfileDispatchProposalController
+    ProfileDispatchProposalController,
+    ReportController
 };
 use App\Http\Controllers\SearchProfileController;
 use App\Http\Controllers\TestimonialController;
@@ -47,6 +48,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('profile-search', [SearchProfileController::class, 'index'])->name('profiles.search');
     Route::get('profiles/search/results', [SearchProfileController::class, 'search'])->name('profiles.search.results');
     
+    // Bulk Upload Routes
+    Route::get('profiles/bulk-upload', [ProfileController::class, 'bulkUploadForm'])->name('profiles.bulk-upload.form');
+    Route::post('profiles/bulk-upload', [ProfileController::class, 'bulkUpload'])->name('profiles.bulk-upload.store');
+    Route::get('profiles/bulk-upload/template', [ProfileController::class, 'downloadTemplate'])->name('profiles.bulk-upload.template');
+    
+    // Reports Routes
+    Route::get('reports/daily', [ReportController::class, 'dailyReport'])->name('reports.daily');
+    Route::get('reports/daily/export', [ReportController::class, 'exportDailyReport'])->name('reports.daily.export');
+    
     // Make profile show route accessible without admin role
     Route::get('profiles/{profile}', [ProfileController::class, 'show'])
         ->name('profiles.show')
@@ -68,6 +78,55 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('admin/profiles', ProfileController::class)
         ->except(['index', 'show']);
     
+    // Profile Relations
+    Route::prefix('profiles/{profile}')->name('profiles.')->group(function () {
+        // Status History
+      Route::get('status-history', [ProfileStatusHistoryController::class, 'index'])
+        ->name('status-history.index');
+
+    Route::post('status-history', [ProfileStatusHistoryController::class, 'updateStatus'])
+        ->name('status-history.update');
+
+    Route::resource('family', ProfileFamilyController::class)->only([
+        'index', 'create', 'store', 'edit', 'update', 'destroy'
+    ]);
+        
+        Route::resource('backgrounds', ProfileBackgroundController::class)->only([
+            'index', 'create', 'store', 'edit', 'update', 'destroy'
+        ]);
+        
+        Route::resource('match-preferences', ProfileMatchPreferenceController::class)->only([
+            'edit', 'update'
+        ]);
+        
+        Route::resource('shortlists', ProfileShortlistController::class)->only([
+            'index', 'store', 'destroy'
+        ]);
+        
+        Route::resource('meetings', ProfileMeetingController::class)->only([
+            'index', 'create', 'store', 'edit', 'update', 'destroy'
+        ]);
+        
+        Route::resource('calls', ProfileCallFollowupController::class)->only([
+            'index', 'create', 'store', 'edit', 'update', 'destroy'
+        ]);
+        
+        Route::resource('attachments', ProfileAttachmentController::class)->only([
+            'index', 'store', 'show', 'destroy'
+        ]);
+        
+        Route::resource('finance', ProfileFinanceController::class)->only([
+            'index', 'create', 'store', 'show', 'edit', 'update', 'destroy'
+        ]);
+        
+        Route::resource('proposals', ProfileDispatchProposalController::class)->only([
+            'index', 'create', 'store', 'show'
+        ]);
+        
+        Route::post('proposals/{proposal}/status', [ProfileDispatchProposalController::class, 'updateStatus'])
+            ->name('proposals.status');
+    });
+
     // Admin Routes Group
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         // User Management
@@ -79,55 +138,6 @@ Route::middleware(['auth'])->group(function () {
         // Permission Management
         Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
             Route::resource('profiles', ProfileController::class)->except(['index', 'show']);
-
-        // Profile Relations
-        Route::prefix('profiles/{profile}')->group(function () {
-            // Status History
-            Route::get('status-history', [ProfileStatusHistoryController::class, 'index'])
-                ->name('profiles.status-history.index');
-            Route::post('status-history', [ProfileStatusHistoryController::class, 'updateStatus'])
-                ->name('profiles.status-history.update');
-                
-            // Nested Resources
-            Route::resource('family', ProfileFamilyController::class)->only([
-                'index', 'create', 'store', 'edit', 'update', 'destroy'
-            ]);
-            
-            Route::resource('backgrounds', ProfileBackgroundController::class)->only([
-                'index', 'create', 'store', 'edit', 'update', 'destroy'
-            ]);
-            
-            Route::resource('match-preferences', ProfileMatchPreferenceController::class)->only([
-                'edit', 'update'
-            ]);
-            
-            Route::resource('shortlists', ProfileShortlistController::class)->only([
-                'index', 'store', 'destroy'
-            ]);
-            
-            Route::resource('meetings', ProfileMeetingController::class)->only([
-                'index', 'create', 'store', 'edit', 'update', 'destroy'
-            ]);
-            
-            Route::resource('calls', ProfileCallFollowupController::class)->only([
-                'index', 'create', 'store', 'edit', 'update', 'destroy'
-            ]);
-            
-            Route::resource('attachments', ProfileAttachmentController::class)->only([
-                'index', 'store', 'show', 'destroy'
-            ]);
-            
-            Route::resource('finance', ProfileFinanceController::class)->only([
-                'index', 'create', 'store', 'show', 'edit', 'update', 'destroy'
-            ]);
-            
-            Route::resource('proposals', ProfileDispatchProposalController::class)->only([
-                'index', 'create', 'store', 'show'
-            ]);
-            
-            Route::post('proposals/{proposal}/status', [ProfileDispatchProposalController::class, 'updateStatus'])
-                ->name('proposals.status');
-        });
     });
 
     // Profile Search API

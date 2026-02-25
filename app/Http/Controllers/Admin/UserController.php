@@ -8,6 +8,7 @@ use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Spatie\Permission\Models\Role as SpatieRole;
 
 class UserController extends Controller
 {
@@ -36,7 +37,7 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'roles' => 'required|array',
             'roles.*' => 'exists:roles,id',
-            'is_active' => 'boolean'
+            'is_active' => 'nullable|boolean'
         ]);
 
         $user = User::create([
@@ -46,7 +47,9 @@ class UserController extends Controller
             'is_active' => $request->has('is_active')
         ]);
 
-        $user->syncRoles($validated['roles']);
+        // Convert role IDs to role names
+        $roleNames = SpatieRole::whereIn('id', $validated['roles'])->pluck('name')->toArray();
+        $user->syncRoles($roleNames);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User created successfully');
@@ -72,7 +75,7 @@ class UserController extends Controller
             'password' => 'nullable|string|min:8|confirmed',
             'roles' => 'required|array',
             'roles.*' => 'exists:roles,id',
-            'is_active' => 'boolean'
+            'is_active' => 'nullable|boolean'
         ];
 
         $validated = $request->validate($rules);
@@ -87,7 +90,9 @@ class UserController extends Controller
         $user->is_active = $request->has('is_active');
         $user->save();
 
-        $user->syncRoles($validated['roles']);
+        // Convert role IDs to role names
+        $roleNames = SpatieRole::whereIn('id', $validated['roles'])->pluck('name')->toArray();
+        $user->syncRoles($roleNames);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User updated successfully');
