@@ -2,14 +2,10 @@
  
 namespace App\Http\Controllers\Admin;
  
-use App\Http\Controllers\Controller;  // Add this line
+use App\Http\Controllers\Controller;  
 use App\Models\Profile;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
- 
+
     // use App\Models\Profile;
 // use Illuminate\Http\Request;
 class ProfileController extends Controller
@@ -162,5 +158,200 @@ $validated['user_id'] = Auth::id();
         $profile->delete();
         return redirect()->route('profiles.index')
             ->with('success', 'Profile deleted successfully.');
+    }
+
+    public function bulkUploadForm()
+    {
+        return view('profiles.bulk-upload');
+    }
+
+    public function bulkUpload(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:csv,txt|max:10240', // 10MB max, only CSV
+        ]);
+
+        try {
+            $skipDuplicates = $request->has('skip_duplicates');
+            $file = $request->file('file');
+            $path = $file->getRealPath();
+            
+            $successCount = 0;
+            $skipCount = 0;
+            $errorCount = 0;
+            $errors = [];
+            
+            // Open and read the CSV file
+            if (($handle = fopen($path, 'r')) !== FALSE) {
+                $header = fgetcsv($handle, 1000, ','); // Read header row
+                $rowNumber = 2; // Start from row 2 (after header)
+                
+                while (($data = fgetcsv($handle, 1000, ',')) !== FALSE) {
+                    try {
+                        // Combine header with data
+                        $row = array_combine($header, $data);
+                        
+                        // Check for duplicate email if skipDuplicates is enabled
+                        if ($skipDuplicates && Profile::where('email', $row['email'] ?? '')->exists()) {
+                            $skipCount++;
+                            continue;
+                        }
+
+                        // Prepare data
+                        $profileData = [
+                            'first_name' => $row['first_name'] ?? '',
+                            'last_name' => $row['last_name'] ?? '',
+                            'gender' => $row['gender'] ?? '',
+                            'email' => $row['email'] ?? '',
+                            'phone' => $row['phone'] ?? '',
+                            'user_code' => Profile::generateUserCode(),
+                            'full_name' => ($row['first_name'] ?? '') . ' ' . ($row['last_name'] ?? ''),
+                            'registration_date' => now(),
+                            'user_id' => Auth::id(),
+                            'status' => $row['status'] ?? 'Active',
+                        ];
+
+                        // Add optional fields if they exist
+                        $optionalFields = [
+                            'alternate_phone', 'dob', 'birth_time', 'birth_place', 'religion', 'caste', 'sub_caste',
+                            'gotra', 'height', 'weight', 'complexion', 'blood_group', 'eating_habit',
+                            'smoking_habit', 'drinking_habit', 'address', 'city', 'state', 'country',
+                            'highest_education', 'occupation', 'income', 'work_location', 'marital_status'
+                        ];
+
+                        foreach ($optionalFields as $field) {
+                            if (isset($row[$field]) && !empty($row[$field])) {
+                                $profileData[$field] = $row[$field];
+                            }
+                        }
+
+                        // Validate the data
+                        $validator = Validator::make($profileData, [
+                            'first_name' => 'required|string|max:255',
+                            'last_name' => 'required|string|max:255',
+                            'gender' => 'required|in:Male,Female,Other',
+                            'email' => 'required|email|unique:profiles,email',
+                            'phone' => 'required|string|max:20',
+                        ]);
+
+                        if ($validator->fails()) {
+                            $errorCount++;
+                            $errors[] = "Row {$rowNumber}: " . implode(', ', $validator->errors()->all());
+                            continue;
+                        }
+
+                        // Create the profile
+                        Profile::create($profileData);
+                        $successCount++;
+
+                    } catch (\Exception $e) {
+                        $errorCount++;
+                        $errors[] = "Row {$rowNumber}: " . $e->getMessage();
+                    }
+                    $rowNumber++;
+                }
+                fclose($handle);
+            }
+            
+            $message = "Import completed: {$successCount} profiles imported successfully.";
+            if ($skipCount > 0) {
+                $message .= " {$skipCount} duplicates skipped.";
+            }
+            if ($errorCount > 0) {
+                $message .= " {$errorCount} errors occurred.";
+                session()->flash('import_errors', $errors);
+            }
+            
+            return redirect()->route('profiles.bulk-upload.form')
+                ->with('success', $message);
+                
+        } catch (\Exception $e) {
+            return redirect()->route('profiles.bulk-upload.form')
+                ->with('error', 'Error processing file: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="profile_import_template.csv"',
+        ];
+        
+        $callback = function() {
+            $file = fopen('php://output', 'w');
+            
+            // CSV headers
+            fputcsv($file, [
+                'first_name',
+                'last_name', 
+                'gender',
+                'email',
+                'phone',
+                'alternate_phone',
+                'dob',
+                'birth_time',
+                'birth_place',
+                'religion',
+                'caste',
+                'sub_caste',
+                'gotra',
+                'height',
+                'weight',
+                'complexion',
+                'blood_group',
+                'eating_habit',
+                'smoking_habit',
+                'drinking_habit',
+                'address',
+                'city',
+                'state',
+                'country',
+                'highest_education',
+                'occupation',
+                'income',
+                'work_location',
+                'marital_status',
+                'status'
+            ]);
+            
+            // Sample data row
+            fputcsv($file, [
+                'John',
+                'Doe',
+                'Male',
+                'john.doe@example.com',
+                '1234567890',
+                '0987654321',
+                '1990-01-15',
+                '10:30',
+                'New York',
+                'Hindu',
+                'General',
+                'Example',
+                'Example',
+                '5\'10"',
+                '70',
+                'Fair',
+                'O+',
+                'Vegetarian',
+                'No',
+                'No',
+                '123 Main St',
+                'New York',
+                'NY',
+                'USA',
+                'Bachelor',
+                'Software Engineer',
+                '75000',
+                'New York',
+                'Single',
+                'Active'
+            ]);
+            
+            fclose($file);
+        };
+        
+        return response()->stream($callback, 200, $headers);
     }
 }

@@ -78,6 +78,18 @@
                 </li>
                 @endcanany
                 
+                <!-- Reports Dropdown -->
+                @can('viewAny', App\Models\Profile::class)
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-graph-up"></i> Reports
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ route('reports.daily') }}"><i class="bi bi-calendar-day me-2"></i>Daily Report</a></li>
+                    </ul>
+                </li>
+                @endcan
+                
                 <!-- More Dropdown -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="moreDropdown" role="button" data-bs-toggle="dropdown">

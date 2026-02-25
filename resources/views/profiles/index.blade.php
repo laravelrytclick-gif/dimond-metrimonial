@@ -7,11 +7,16 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>{{ __('Profiles') }}</span>
-                    @can('create', App\Models\Profile::class)
-                        <a href="{{ route('profiles.create') }}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus"></i> {{ __('Add New Profile') }}
-                        </a>
-                    @endcan
+                    <div>
+                        @can('create', App\Models\Profile::class)
+                            <a href="{{ route('profiles.bulk-upload.form') }}" class="btn btn-success btn-sm me-2">
+                                <i class="fas fa-upload"></i> {{ __('Bulk Upload') }}
+                            </a>
+                            <a href="{{ route('profiles.create') }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus"></i> {{ __('Add New Profile') }}
+                            </a>
+                        @endcan
+                    </div>
                 </div>
 
                 <div class="card-body">
