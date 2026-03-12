@@ -26,7 +26,7 @@
 
                     <ul class="nav nav-tabs" id="proposalTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="sent-tab" data-bs-toggle="tab" 
+                            <button class=" " id="sent-tab" data-bs-toggle="tab" 
                                     data-bs-target="#sent" type="button" role="tab">
                                 Sent Proposals ({{ $proposals->total() }})
                             </button>

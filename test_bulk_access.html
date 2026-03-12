@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Bulk Upload</title>
+</head>
+<body>
+    <h1>Testing Bulk Upload Access</h1>
+    
+    <p><strong>URLs to test:</strong></p>
+    <ul>
+        <li><a href="http://127.0.0.1:8003/profiles/bulk-upload" target="_blank">http://127.0.0.1:8003/profiles/bulk-upload</a></li>
+        <li><a href="http://127.0.0.1:8003/profiles/bulk-upload/template" target="_blank">Download Template</a></li>
+    </ul>
+    
+    <p><strong>If you're seeing 404, check:</strong></p>
+    <ol>
+        <li>Are you logged in?</li>
+        <li>Is the server running on port 8003?</li>
+        <li>Are you using the correct URL?</li>
+    </ol>
+    
+    <p><strong>Current Status:</strong></p>
+    <ul>
+        <li>✅ Routes are correctly registered</li>
+        <li>✅ Controller methods exist</li>
+        <li>✅ View file exists</li>
+        <li>✅ Server is running on port 8003</li>
+    </ul>
+    
+    <script>
+        // Test if we can access the bulk upload page via AJAX
+        fetch('/profiles/bulk-upload')
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('status').innerHTML = '✅ Bulk upload page is accessible!';
+                } else {
+                    document.getElementById('status').innerHTML = '❌ Bulk upload page returned: ' + response.status;
+                }
+            })
+            .catch(error => {
+                document.getElementById('status').innerHTML = '❌ Error accessing bulk upload: ' + error.message;
+            });
+    </script>
+    
+    <p id="status">Testing...</p>
+</body>
+</html>

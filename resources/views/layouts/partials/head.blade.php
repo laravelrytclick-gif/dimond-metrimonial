@@ -14,7 +14,7 @@
 
 <style>
     :root {
-        --primary-color: #4e73df;
+        --primary-color: #8B0000;
         --secondary-color: #f8f9fc;
         --accent-color: #36b9cc;
         --text-color: #5a5c69;
@@ -50,13 +50,13 @@
 
     /* Active link in secondary navbar */
     .navbar-light .nav-link.active {
-        color: #4e73df !important;
+        color: #8B0000 !important;
         font-weight: 600;
     }
 
     /* Hover effect */
     .navbar-light .nav-link:hover {
-        color: #4e73df !important;
+        color: #8B0000 !important;
     }
     
     .nav-link {
@@ -71,7 +71,28 @@
     }
     
     .nav-link:hover, .nav-link.active {
-        background-color: rgba(0, 0, 0, 0.05);
+        background-color: #8B0000 !important;
+        color: white !important;
+        border-radius: 4px;
+    }
+    
+    /* Force active navlink styling */
+    .navbar-light .nav-link.active {
+        background-color: #8B0000 !important;
+        color: white !important;
+        font-weight: 600;
+    }
+    
+    /* Secondary navbar specific hover and active */
+    .navbar-light .navbar-nav .nav-link:hover {
+        background-color: #8B0000 !important;
+        color: white !important;
+        border-radius: 4px;
+    }
+    
+    .navbar-light .navbar-nav .nav-link.active {
+        background-color: #8B0000 !important;
+        color: white !important;
         border-radius: 4px;
     }
     
@@ -114,28 +135,28 @@
     }
     
     .nav-tabs .nav-link.active {
-        color: #4e73df !important;
+        color: #8B0000 !important;
         background-color: #fff;
         border-color: #e3e6f0 #e3e6f0 #fff;
     }
     
     .nav-tabs .nav-link:hover {
         border-color: #e3e6f0 #e3e6f0 #e3e6f0;
-        color: #4e73df !important;
+        color: #8B0000 !important;
     }
     
     .btn-primary {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
+        background-color: #8B0000;
+        border-color: #8B0000;
     }
     
     .btn-primary:hover {
-        background-color: #2e59d9;
-        border-color: #2653d4;
+        background-color: #6B0000;
+        border-color: #5B0000;
     }
     
     .welcome-card {
-        border-left: 0.25rem solid #4e73df;
+        border-left: 0.25rem solid #8B0000;
     }
 </style>
 

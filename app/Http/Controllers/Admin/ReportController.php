@@ -202,4 +202,107 @@ class ReportController extends Controller
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
     }
+
+    public function todayWorkHistory(Request $request)
+    {
+        $date = $request->get('date', Carbon::today()->format('Y-m-d'));
+        $selectedRM = $request->get('rm_id', 'all');
+
+        // Get all RMs
+        $rms = User::role('rm')->with('managedProfiles')->get();
+
+        // Get all activities for the selected date
+        $activities = collect();
+
+        // Profile status changes
+        $statusChanges = DB::table('profile_status_histories')
+            ->join('profiles', 'profile_status_histories.profile_id', '=', 'profiles.id')
+            ->join('users', 'profiles.rm_id', '=', 'users.id')
+            ->select([
+                'profile_status_histories.id',
+                'profile_status_histories.profile_id',
+                'profiles.full_name as profile_name',
+                'users.name as rm_name',
+                DB::raw("'Status Change' as activity_type"),
+                DB::raw("'profile_status_histories' as source_table"),
+                'profile_status_histories.changed_at',
+                DB::raw("NULL as comments"),
+                DB::raw("NULL as amount"),
+                DB::raw("NULL as payment_type")
+            ])
+            ->when($selectedRM !== 'all', function($q) use ($selectedRM) {
+                return $q->where('profiles.rm_id', $selectedRM);
+            })
+            ->whereDate('profile_status_histories.changed_at', $date);
+
+        // Meetings
+        $meetings = DB::table('profile_meetings')
+            ->join('profiles', 'profile_meetings.profile_id', '=', 'profiles.id')
+            ->join('users', 'profiles.rm_id', '=', 'users.id')
+            ->select([
+                'profile_meetings.id',
+                'profile_meetings.profile_id',
+                'profiles.full_name as profile_name',
+                'users.name as rm_name',
+                DB::raw("'Meeting' as activity_type"),
+                DB::raw("'profile_meetings' as source_table"),
+                'profile_meetings.meeting_date as changed_at',
+                'profile_meetings.notes as comments',
+                DB::raw("NULL as amount"),
+                DB::raw("NULL as payment_type")
+            ])
+            ->when($selectedRM !== 'all', function($q) use ($selectedRM) {
+                return $q->where('profiles.rm_id', $selectedRM);
+            })
+            ->whereDate('profile_meetings.meeting_date', $date);
+
+        // Call followups
+        $calls = DB::table('profile_call_followups')
+            ->join('profiles', 'profile_call_followups.profile_id', '=', 'profiles.id')
+            ->join('users', 'profiles.rm_id', '=', 'users.id')
+            ->select([
+                'profile_call_followups.id',
+                'profile_call_followups.profile_id',
+                'profiles.full_name as profile_name',
+                'users.name as rm_name',
+                DB::raw("'Call Followup' as activity_type"),
+                DB::raw("'profile_call_followups' as source_table"),
+                'profile_call_followups.followup_date as changed_at',
+                'profile_call_followups.notes as comments',
+                DB::raw("NULL as amount"),
+                DB::raw("NULL as payment_type")
+            ])
+            ->when($selectedRM !== 'all', function($q) use ($selectedRM) {
+                return $q->where('profiles.rm_id', $selectedRM);
+            })
+            ->whereDate('profile_call_followups.followup_date', $date);
+
+        // Payments
+        $payments = DB::table('profile_finances')
+            ->join('profiles', 'profile_finances.profile_id', '=', 'profiles.id')
+            ->join('users', 'profiles.rm_id', '=', 'users.id')
+            ->select([
+                'profile_finances.id',
+                'profile_finances.profile_id',
+                'profiles.full_name as profile_name',
+                'users.name as rm_name',
+                DB::raw("'Payment' as activity_type"),
+                DB::raw("'profile_finances' as source_table"),
+                'profile_finances.payment_date as changed_at',
+                DB::raw("CONCAT('Amount: ', amount_paid, ', Type: ', payment_mode) as comments"),
+                'profile_finances.amount_paid as amount',
+                'profile_finances.payment_mode as payment_type'
+            ])
+            ->when($selectedRM !== 'all', function($q) use ($selectedRM) {
+                return $q->where('profiles.rm_id', $selectedRM);
+            })
+            ->whereDate('profile_finances.payment_date', $date);
+
+        // Combine all activities
+        $allActivities = $statusChanges->union($meetings)->union($calls)->union($payments);
+
+        $allActivities = $allActivities->orderBy('changed_at', 'desc')->get();
+
+        return view('reports.today-work', compact('allActivities', 'rms', 'date', 'selectedRM'));
+    }
 }

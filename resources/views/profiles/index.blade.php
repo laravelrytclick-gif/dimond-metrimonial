@@ -9,7 +9,7 @@
                     <span>{{ __('Profiles') }}</span>
                     <div>
                         @can('create', App\Models\Profile::class)
-                            <a href="{{ route('profiles.bulk-upload.form') }}" class="btn btn-success btn-sm me-2">
+                            <a href="{{ route('profiles.bulk-upload') }}" class="btn btn-success btn-sm me-2">
                                 <i class="fas fa-upload"></i> {{ __('Bulk Upload') }}
                             </a>
                             <a href="{{ route('profiles.create') }}" class="btn btn-primary btn-sm">
