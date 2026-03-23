@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Models;
+use App\Services\ProfileNumberService;
+use App\Rules\UniqueProfileNumber;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -14,6 +16,7 @@ class Profile extends Model
     protected $fillable = [
         'user_id',
         'user_code',
+        'profile_number',
         'full_name',
         'first_name',
         'last_name',
@@ -40,11 +43,19 @@ class Profile extends Model
         'state',
         'country',
         'highest_education',
+        'education_detail',
         'occupation',
+        'occupation_detail',
         'income',
         'work_location',
         'rm_id',
+        'tme_id',
+        'me_id',
         'status',
+        'membership_type',
+        'payment_date',
+        'has_been_visited',
+        'last_visited_date',
         'marital_status',
         'profile_photo_path',
         'registration_date',
@@ -54,13 +65,56 @@ class Profile extends Model
         'dob' => 'date',
         'birth_time' => 'datetime:H:i',
         'registration_date' => 'date',
+        'payment_date' => 'datetime',
+        'last_visited_date' => 'datetime',
+        'has_been_visited' => 'boolean',
         'income' => 'decimal:2',
     ];
+
+    /**
+     * Boot the model
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Auto-generate profile number on creation
+        static::creating(function ($profile) {
+            if (empty($profile->profile_number)) {
+                $isPaid = $profile->membership_type === 'paid';
+                $profile->profile_number = ProfileNumberService::generateProfileNumber($isPaid);
+            }
+        });
+    }
 
     // Accessor for age
     public function getAgeAttribute()
     {
         return $this->dob ? $this->dob->age : null;
+    }
+
+    // Accessor for visited status text
+    public function getVisitedStatusTextAttribute()
+    {
+        return $this->has_been_visited ? 'Visited' : 'Not Visited';
+    }
+
+    // Method to mark profile as visited
+    public function markAsVisited()
+    {
+        $this->update([
+            'has_been_visited' => true,
+            'last_visited_date' => now()
+        ]);
+    }
+
+    // Method to mark profile as not visited
+    public function markAsNotVisited()
+    {
+        $this->update([
+            'has_been_visited' => false,
+            'last_visited_date' => null
+        ]);
     }
 
     /**
@@ -160,6 +214,18 @@ class Profile extends Model
         return $this->belongsTo(User::class, 'rm_id');
     }
 
+    // Relationship with TME (Tele Marketing Executive)
+    public function tme()
+    {
+        return $this->belongsTo(User::class, 'tme_id');
+    }
+
+    // Relationship with ME (Marketing Executive)
+    public function me()
+    {
+        return $this->belongsTo(User::class, 'me_id');
+    }
+
     // Generate a unique user code
     public static function generateUserCode()
     {
@@ -243,6 +309,11 @@ public function getActiveSubscriptionAttribute()
 public function attachments()
 {
     return $this->hasMany(ProfileAttachment::class)->latest();
+}
+
+public function interactions()
+{
+    return $this->hasMany(ProfileInteraction::class)->latest('interaction_date');
 }
 
 public function photos()

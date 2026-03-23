@@ -22,6 +22,19 @@ class ProfileShortlistController extends Controller
         return view('profiles.shortlists.index', compact('profile', 'shortlists'));
     }
 
+    public function create(Profile $profile)
+    {
+        $this->authorize('update', $profile);
+        
+        // Get all profiles except the current one
+        $profiles = Profile::where('id', '!=', $profile->id)
+            ->where('status', 'active')
+            ->orderBy('first_name')
+            ->get(['id', 'first_name', 'last_name', 'gender', 'dob']);
+
+        return view('profiles.shortlists.create', compact('profile', 'profiles'));
+    }
+
     public function store(Request $request, Profile $profile)
     {
         $this->authorize('update', $profile);

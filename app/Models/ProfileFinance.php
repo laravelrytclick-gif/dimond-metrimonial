@@ -30,6 +30,18 @@ class ProfileFinance extends Model
         return $this->belongsTo(Profile::class);
     }
 
+    // Accessor for backward compatibility with amount property
+    public function getAmountAttribute()
+    {
+        return $this->amount_paid;
+    }
+
+    // Accessor for backward compatibility with payment_type property
+    public function getPaymentTypeAttribute()
+    {
+        return $this->payment_mode;
+    }
+
     public static function getPaymentModes()
     {
         return [

@@ -9,3 +9,167 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Dark Mode Styles */
+.dark-mode {
+    background-color: #0f172a !important;
+    color: #e2e8f0 !important;
+}
+
+/* Navbar Dark Mode */
+.dark-mode .navbar {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+.dark-mode .navbar-brand {
+    color: #f1f5f9 !important;
+}
+
+.dark-mode .nav-link {
+    color: #e2e8f0 !important;
+}
+
+.dark-mode .nav-link:hover {
+    color: #f1f5f9 !important;
+}
+
+/* Buttons Dark Mode */
+.dark-mode .btn {
+    background-color: #374151 !important;
+    color: #e2e8f0 !important;
+    border-color: #4b5563 !important;
+}
+
+.dark-mode .btn:hover {
+    background-color: #4b5563 !important;
+    color: #f1f5f9 !important;
+}
+
+.dark-mode .btn-link {
+    color: #60a5fa !important;
+}
+
+.dark-mode .btn-link:hover {
+    color: #93c5fd !important;
+}
+
+/* Cards Dark Mode */
+.dark-mode .card {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+.dark-mode .card-header {
+    background-color: #334155 !important;
+    border-color: #475569 !important;
+    color: #f1f5f9 !important;
+}
+
+/* Forms Dark Mode */
+.dark-mode .form-control {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #e2e8f0 !important;
+}
+
+.dark-mode .form-control:focus {
+    background-color: #4b5563 !important;
+    border-color: #60a5fa !important;
+    color: #f1f5f9 !important;
+}
+
+.dark-mode .form-label {
+    color: #e2e8f0 !important;
+}
+
+/* Tables Dark Mode */
+.dark-mode .table {
+    color: #e2e8f0 !important;
+}
+
+.dark-mode .table-striped > tbody > tr:nth-of-type(odd) > td,
+.dark-mode .table-striped > tbody > tr:nth-of-type(odd) > th {
+    background-color: #1e293b !important;
+}
+
+.dark-mode .table-hover > tbody > tr:hover > td,
+.dark-mode .table-hover > tbody > tr:hover > th {
+    background-color: #334155 !important;
+}
+
+/* Dropdown Dark Mode */
+.dark-mode .dropdown-menu {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+.dark-mode .dropdown-item {
+    color: #e2e8f0 !important;
+}
+
+.dark-mode .dropdown-item:hover {
+    background-color: #374151 !important;
+    color: #f1f5f9 !important;
+}
+
+/* Modal Dark Mode */
+.dark-mode .modal-content {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+.dark-mode .modal-header {
+    background-color: #334155 !important;
+    border-color: #475569 !important;
+}
+
+/* Alerts Dark Mode */
+.dark-mode .alert {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #e2e8f0 !important;
+}
+
+/* Body text and links */
+.dark-mode body {
+    background-color: #0f172a !important;
+    color: #e2e8f0 !important;
+}
+
+.dark-mode a {
+    color: #60a5fa !important;
+}
+
+.dark-mode a:hover {
+    color: #93c5fd !important;
+}
+
+/* Sidebar Dark Mode */
+.dark-mode .sidebar {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+.dark-mode .sidebar .nav-link {
+    color: #e2e8f0 !important;
+}
+
+.dark-mode .sidebar .nav-link:hover,
+.dark-mode .sidebar .nav-link.active {
+    background-color: #374151 !important;
+    color: #f1f5f9 !important;
+}
+
+/* Footer Dark Mode */
+.dark-mode footer {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+
+/* Smooth transitions for theme switching */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
